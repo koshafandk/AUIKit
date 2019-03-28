@@ -110,26 +110,29 @@ open class AUIUpdatableWideCollectionViewLayout: UICollectionViewLayout, AUIUpda
     guard let cellController = delegate?.getCellController(for: indexPath) else { return }
     let cellSize = getCellSize(for: cellController)
     let layoutAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-    
+    layoutAttributes.frame = calculateFrameForItem(indexPath: indexPath, itemSize: cellSize)
+//    print("\(layoutAttributes.frame) for index: \(indexPath.row)")
     let attributesToChange = itemsLayoutAttributes.filter { $0.indexPath >= indexPath }
     attributesToChange.forEach {
       $0.indexPath.row += 1
       $0.frame.origin.y += cellSize.height
     }
     
-    contentViewHeight += cellSize.height
-    let heightAbove = getHeightBefore(indexPath: indexPath)
-    layoutAttributes.frame = CGRect(x: 0, y: heightAbove, width: cellSize.width, height: cellSize.height)
     itemsLayoutAttributes.append(layoutAttributes)
+    updateContentSize()
   }
   
-  private func getHeightBefore(indexPath: IndexPath) -> CGFloat {
-    let attributesAbove = itemsLayoutAttributes.filter { $0.indexPath < indexPath }
-    let heightAbove = attributesAbove.reduce(into: 0, { (result, attribute) in
-      result += attribute.frame.height
-    })
-    return heightAbove
+  func updateContentSize() {
+    contentViewHeight = itemsLayoutAttributes.max { $0.frame.maxY < $1.frame.maxY }?.frame.maxY ?? 0
   }
+  
+//  private func getHeightBefore(indexPath: IndexPath) -> CGFloat {
+//    let attributesAbove = itemsLayoutAttributes.filter { $0.indexPath < indexPath }
+//    let heightAbove = attributesAbove.reduce(into: 0, { (result, attribute) in
+//      result += attribute.frame.height
+//    })
+//    return heightAbove
+//  }
   
   // MARK: - Prepare for delete
   
@@ -150,7 +153,7 @@ open class AUIUpdatableWideCollectionViewLayout: UICollectionViewLayout, AUIUpda
       $0.frame.origin.y -= layoutAttribute.frame.height
       $0.indexPath.row -= 1
     }
-    contentViewHeight -= layoutAttribute.frame.height
+    updateContentSize()
   }
   
   // MARK: - Prepare for update
@@ -176,15 +179,38 @@ open class AUIUpdatableWideCollectionViewLayout: UICollectionViewLayout, AUIUpda
   
   open func recalculateCellsSizes() {
     guard let delegate = delegate else { return }
-    contentViewHeight = 0
     let sortedLayoutAttributes = getSortedByIndexPathLayoutAttributes()
     sortedLayoutAttributes.forEach {
       if let cellController = delegate.getCellController(for: $0.indexPath) {
         let cellSize = getCellSize(for: cellController)
-        $0.frame = CGRect(x: 0, y: contentViewHeight, width: cellSize.width, height: cellSize.height)
-        contentViewHeight += cellSize.height
+        $0.frame = calculateFrameForItem(indexPath: $0.indexPath, itemSize: cellSize)
       }
     }
+    updateContentSize()
+  }
+  
+  func getIndexPathBefore(indexPath: IndexPath) -> IndexPath? {
+    guard indexPath.row > 0 else  { return nil }
+    if indexPath.row > 0 {
+      return IndexPath(row: indexPath.row - 1, section: indexPath.section)
+    } else {
+      let previousSection = indexPath.section - 1
+      let itemsCount = collectionView?.numberOfItems(inSection: previousSection) ?? 0
+      return IndexPath(row: itemsCount - 1, section: previousSection)
+    }
+  }
+  
+  func calculateFrameForItem(indexPath: IndexPath, itemSize: CGSize) -> CGRect {
+    guard
+      let indexPathBefore = getIndexPathBefore(indexPath: indexPath),
+      let attributesBefore = findLayoutAttributes(for: indexPathBefore)else {
+        return CGRect(origin: .zero, size: itemSize)
+    }
+    return CGRect(
+      x: attributesBefore.frame.origin.x,
+      y: attributesBefore.frame.maxY,
+      width: itemSize.width,
+      height: itemSize.height)
   }
   
 }

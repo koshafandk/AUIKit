@@ -31,18 +31,7 @@ open class AUIUpdatableLeftCollectionViewLayout: AUIUpdatableWideCollectionViewL
     updateContentSize()
   }
   
-  func getIndexPathBefore(indexPath: IndexPath) -> IndexPath? {
-    guard indexPath.row > 0 else  { return nil }
-    if indexPath.row > 0 {
-      return IndexPath(row: indexPath.row - 1, section: indexPath.section)
-    } else {
-      let previousSection = indexPath.section - 1
-      let itemsCount = collectionView?.numberOfItems(inSection: previousSection) ?? 0
-      return IndexPath(row: itemsCount - 1, section: previousSection)
-    }
-  }
-  
-  func calculateFrameForItem(indexPath: IndexPath, itemSize: CGSize) -> CGRect {
+  override func calculateFrameForItem(indexPath: IndexPath, itemSize: CGSize) -> CGRect {
     guard
         let indexPathBefore = getIndexPathBefore(indexPath: indexPath),
         let attributesBefore = findLayoutAttributes(for: indexPathBefore)else {
@@ -95,10 +84,6 @@ open class AUIUpdatableLeftCollectionViewLayout: AUIUpdatableWideCollectionViewL
       $0.frame = calculateFrameForItem(indexPath: $0.indexPath, itemSize: $0.frame.size)
     }
     updateContentSize()
-  }
-  
-  private func updateContentSize() {
-    contentViewHeight = itemsLayoutAttributes.max { $0.frame.maxY < $1.frame.maxY }?.frame.maxY ?? 0
   }
   
   override func getCellSize(for cellController: AUICollectionViewCellController) -> CGSize {
