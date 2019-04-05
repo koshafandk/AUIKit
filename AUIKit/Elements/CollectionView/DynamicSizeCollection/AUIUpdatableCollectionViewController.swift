@@ -84,10 +84,8 @@ open class AUIUpdatableCollectionViewController: AUIDefaultScrollViewController 
 extension AUIUpdatableCollectionViewController: AUIInsertingCellControllers {
   
   open func insertCellControllersAtBegin(_ cellControllers: [AUICollectionViewCellController], animated: Bool) {
-    let cellCountBeforeInsert = self.cellControllers.count
     self.cellControllers.insert(contentsOf: cellControllers, at: 0)
     insertCellsAtBegin(for: cellControllers,
-                       countBeforeInsert: cellCountBeforeInsert,
                        animated: animated)
   }
   
@@ -99,17 +97,15 @@ extension AUIUpdatableCollectionViewController: AUIInsertingCellControllers {
   
   open func insertCellControllers(_ cellControllers: [AUICollectionViewCellController], before: AUICollectionViewCellController, animated: Bool) {
     guard let index = findIndex(of: before) else { return }
-    let cellCountBeforeInsert = self.cellControllers.count
     self.cellControllers.insert(contentsOf: cellControllers, at: index)
-    insertCells(with: cellControllers, before: index, countBeforeInsert: cellCountBeforeInsert, animated: animated)
+    insertCells(with: cellControllers, before: index, animated: animated)
   }
   
   open func insertCellControllers(_ cellControllers: [AUICollectionViewCellController], after: AUICollectionViewCellController, animated: Bool) {
     guard let index = findIndex(of: after) else { return }
     let newIndex = index + 1
-    let cellCountBeforeInsert = self.cellControllers.count
     self.cellControllers.insert(contentsOf: cellControllers, at: newIndex)
-    insertCells(with: cellControllers, after: index, countBeforeInsert: cellCountBeforeInsert, animated: animated)
+    insertCells(with: cellControllers, after: index, animated: animated)
   }
 }
 
@@ -218,11 +214,9 @@ private extension AUIUpdatableCollectionViewController {
   // MARK: - Insert cells at begin
   
   func insertCellsAtBegin(for cellControllers: [AUICollectionViewCellController],
-                          countBeforeInsert: Int,
                           animated: Bool) {
     let indexPaths = generateInsertAtBeginIndexPaths(cellCount: cellControllers.count)
     insertItems(indexPaths: indexPaths,
-                countBeforeInsert: countBeforeInsert,
                 animated: animated)
   }
   
@@ -241,7 +235,6 @@ private extension AUIUpdatableCollectionViewController {
                         animated: Bool) {
     let indexPaths = generateInsertAtEndIndexPaths(cellCount: cellControllers.count, countBeforeInsert: countBeforeInsert)
     insertItems(indexPaths: indexPaths,
-                countBeforeInsert: countBeforeInsert,
                 animated: animated)
   }
   
@@ -259,11 +252,9 @@ private extension AUIUpdatableCollectionViewController {
   
   func insertCells(with cellControllers: [AUICollectionViewCellController],
                    after: Int,
-                   countBeforeInsert: Int,
                    animated: Bool) {
     let indexPaths = generateInsertAfterIndexPaths(cellCount: cellControllers.count, after: after)
     insertItems(indexPaths: indexPaths,
-                countBeforeInsert: countBeforeInsert,
                 animated: animated)
   }
   
@@ -279,11 +270,9 @@ private extension AUIUpdatableCollectionViewController {
   
   func insertCells(with cellControllers: [AUICollectionViewCellController],
                    before: Int,
-                   countBeforeInsert: Int,
                    animated: Bool) {
     let indexPaths = generateInsertBeforeIndexPaths(cellCount: cellControllers.count, before: before)
     insertItems(indexPaths: indexPaths,
-                countBeforeInsert: countBeforeInsert,
                 animated: animated)
   }
   
@@ -295,7 +284,7 @@ private extension AUIUpdatableCollectionViewController {
     return indexPaths
   }
   
-  func insertItems(indexPaths: [IndexPath], countBeforeInsert: Int, animated: Bool) {
+  func insertItems(indexPaths: [IndexPath], animated: Bool) {
     layout?.prepareForInsert(at: indexPaths)
     if let collectionView = collectionView {
       if animated && canUpdateCollectionAnimated() {
