@@ -233,6 +233,12 @@ open class AUIDefaultTableViewController: AUIDefaultScrollViewController, AUITab
     let index = indexPath.row
     return sectionControllers[section].didEndDisplayingCellAtIndex(index: index)
   }
+  
+  // MARK: - ScrollView
+  
+  open func didScroll() {
+    
+  }
 }
 
 protocol AUITableViewDelegateProxyDelegate: class {
@@ -266,6 +272,10 @@ protocol AUITableViewDelegateProxyDelegate: class {
   func heightForFooterInSection(_ section: Int) -> CGFloat
   func willDisplayFooterView(_ view: UIView, forSection section: Int)
   func didEndDisplayingFooterInSection(_ section: Int)
+  
+  // MARK: ScrollView
+  
+  func didScroll()
 }
 
 class UITableViewDelegateProxy: NSObject, UITableViewDataSource, UITableViewDelegate, UITableViewDataSourcePrefetching {
@@ -356,6 +366,12 @@ class UITableViewDelegateProxy: NSObject, UITableViewDataSource, UITableViewDele
   
   func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
     delegate?.didEndDisplayingCellAtIndexPath(indexPath)
+  }
+  
+  // MARK: - ScrollView
+  
+  func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    delegate?.didScroll()
   }
   
 }
