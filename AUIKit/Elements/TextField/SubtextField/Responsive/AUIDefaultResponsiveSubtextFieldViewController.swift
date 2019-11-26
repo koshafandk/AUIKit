@@ -24,7 +24,11 @@ open class AUIDefaultResponsiveSubtextFieldViewController: AUIDefaultSubtextFiel
   
   open override func setupView() {
     super.setupView()
-    
+    if subtextFieldController?.text?.isEmpty == false {
+      responsiveSubtextFieldView?.responsiveSubtextInputViewDidEndEditingNonempty(animated: false)
+    } else {
+      responsiveSubtextFieldView?.responsiveSubtextInputViewDidEndEditingEmpty(animated: false)
+    }
   }
   
   // MARK: Events
